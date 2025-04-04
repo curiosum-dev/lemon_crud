@@ -18,7 +18,7 @@ defmodule LemonCrud.GetTest do
       items: [%{id: id, subcategory_id: subcategory_id} | _]
     } do
       assert %Item{id: ^id, subcategory: %Subcategory{id: ^subcategory_id}} =
-               ItemContext.get_item(id, preload: :subcategory)
+               ItemContext.get_item(id, :subcategory)
     end
 
     test "returns the resource with subcategory and category preloads", %{
@@ -35,7 +35,7 @@ defmodule LemonCrud.GetTest do
                  category: %Category{id: ^category_id}
                }
              } =
-               ItemContext.get_item(id, preload: [subcategory: :category])
+               ItemContext.get_item(id, subcategory: :category)
     end
 
     test "returns nil if the resource does not exist" do

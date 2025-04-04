@@ -82,28 +82,6 @@ defmodule LemonCrud.CountTest do
     end
   end
 
-  describe "get with count" do
-    test "counts associations", %{categories: [category1, _category2]} do
-      category = CategoryContext.get_category(category1.id, count: [:subcategories, :items])
-
-      assert category.subcategories_count == 2
-      assert category.items_count == 4
-    end
-
-    test "counts associations with preload", %{categories: [category1, _category2]} do
-      category =
-        CategoryContext.get_category(
-          category1.id,
-          count: [:subcategories, :items],
-          preload: [:subcategories]
-        )
-
-      assert category.subcategories_count == 2
-      assert category.items_count == 4
-      assert length(category.subcategories) == 2
-    end
-  end
-
   describe "get_by with count" do
     test "counts associations", %{categories: [category1, _category2]} do
       category =

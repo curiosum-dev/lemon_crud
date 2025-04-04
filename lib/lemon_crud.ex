@@ -149,23 +149,32 @@ defmodule LemonCrud do
         If a list of preloads is provided, it will be used to preload the #{resource_name}.
         Preloads can be an atom or a list of atoms.
 
+        Note that this function only takes a single `preload` argument as opposed to `get_..._by/2` functions
+        that take keyword lists of options, also allowing for other options such as `limit`, `offset`, `count`, etc.
+        This is because it uses `Repo.get/1` under the hood, which bypasses LemonCrud's query building.
+
+        Note that **this function does not take other options than `preload`** because it uses `Repo.get/1` under the hood.
+        To use other options such as `limit`, `offset`, `count`, etc., use `get_..._by/2` functions that perform query
+        construction, at which stage these options are processed.
+
         ## Examples
 
             iex> get_#{resource_name}(id)
             %#{Macro.camelize(resource_name)}{} or nil
 
-            iex> get_#{resource_name}(id, preload: [:associated])
+            iex> get_#{resource_name}(id, [:associated])
             %#{Macro.camelize(resource_name)}{associated: ...} or nil
         """
 
-        @spec unquote(function_name)(integer() | String.t(), keyword()) ::
+        @spec unquote(function_name)(integer() | String.t(), list(atom())) ::
                 %unquote(schema){} | nil
-        def unquote(function_name)(id, opts \\ []) when is_list(opts) do
+        def unquote(function_name)(id, preloads \\ [])
+            when is_list(preloads) or is_atom(preloads) do
           unquote(schema)
           |> unquote(repo).get(id)
           |> case do
             nil -> nil
-            record -> unquote(repo).preload(record, opts[:preload] || [])
+            record -> unquote(repo).preload(record, preloads)
           end
         end
 
