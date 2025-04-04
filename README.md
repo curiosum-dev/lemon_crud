@@ -27,7 +27,7 @@ Here is how you can generate common CRUD operations for `App.Account.Users`:
 
 ```elixir
 defmodule App.Account.Users do
-  use Contexted.CRUD,
+  use LemonCrud,
     repo: App.Repo,
     schema: App.Accounts.User
 end
