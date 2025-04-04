@@ -2,8 +2,8 @@ defmodule LemonCrud.DataCase do
   @moduledoc false
   use ExUnit.CaseTemplate
 
-  alias LemonCrud.TestApp.Repo
   alias Ecto.Adapters.SQL.Sandbox
+  alias LemonCrud.TestApp.Repo
 
   using do
     quote do
