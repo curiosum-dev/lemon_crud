@@ -11,7 +11,12 @@ defmodule LemonCrud.MixProject do
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      package: package()
+      package: package(),
+      dialyzer: [
+        plt_file: {:no_warn, "priv/plts/dialyzer.plt"},
+        plt_add_apps: [:mix, :ex_unit, :ecto, :ecto_sql, :postgrex],
+        plt_add_deps: :app_tree
+      ]
     ]
   end
 
@@ -28,6 +33,7 @@ defmodule LemonCrud.MixProject do
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:ex_doc, "~> 0.37", only: :dev, runtime: false},
       {:versioce, "~> 2.0.0", only: :dev, runtime: false},
+      {:dialyxir, "~> 1.4.5", only: [:dev, :test], runtime: false},
       {:ecto, "~> 3.0"},
       {:ecto_sql, "~> 3.0", optional: true},
       {:postgrex, ">= 0.0.0", optional: true, only: [:dev, :test]}
