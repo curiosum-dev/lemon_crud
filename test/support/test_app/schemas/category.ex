@@ -10,8 +10,8 @@ defmodule LemonCrud.TestApp.Category do
     has_many(:subcategories, LemonCrud.TestApp.Subcategory)
     has_many(:items, through: [:subcategories, :items])
 
-    field(:subcategories_count, :integer, virtual: true, default: 0)
-    field(:items_count, :integer, virtual: true, default: 0)
+    field(:subcategories_count, :integer, virtual: true, default: nil)
+    field(:items_count, :integer, virtual: true, default: nil)
 
     timestamps()
   end
