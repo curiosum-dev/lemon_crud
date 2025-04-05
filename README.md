@@ -102,6 +102,149 @@ iex> App.Accounts.Users.get_user_by!(profile: [email: "user@example.com"], prelo
 iex> App.Accounts.Users.get_user_by!(App.Accounts.User |> where([u], u.id == 10), preload: [:profile, :subscription])
 ```
 
+## Using Ecto Queries
+
+LemonCrud provides built-in support for using Ecto queries directly as arguments to the generated functions. This gives you more flexibility and power when you need more complex filtering than what the simple keyword list conditions can provide.
+
+### List Functions with Ecto Queries
+
+You can pass an Ecto query as the first argument to any `list_*` function:
+
+```elixir
+# Basic query with a WHERE clause
+iex> ItemContext.list_items(from(i in Item, where: like(i.name, "Item 1.2.%")))
+
+# Combining a query with additional options.
+#
+# Note that the second dargument can still take options as described earlier -
+# they will be appended to the base queryable provided in the first argument.
+iex> ItemContext.list_items(
+  from(i in Item, where: like(i.name, "Item 1.2.%")),
+  limit: 1,
+  offset: 1,
+  order_by: [desc: :name]
+)
+
+# The schema module can also be used directly, as it's also a queryable.
+iex> ItemContext.list_items(Item, limit: 2, offset: 1, order_by: [desc: :name])
+```
+
+### Get Functions with Ecto Queries
+
+Similarly, the `get_*_by` and `get_*_by!` functions can accept Ecto queries - behaving in line with their underlying calls to `Ecto.Repo`'s `get_by` and `get_by!` functions, respectively:
+
+```elixir
+# Find a record with a complex WHERE condition
+iex> ItemContext.get_item_by(
+  from(i in Item,
+    where: like(i.name, "Item 1.1.%") and i.serial_number == "1234567890"
+  )
+)
+
+# Using a query with preloads
+iex> CategoryContext.get_category_by(
+  from(c in Category, where: c.id == ^category_id),
+  preload: [:subcategories]
+)
+```
+
+These query-based approaches are especially useful when:
+
+1. You need complex filtering logic (multiple conditions, OR clauses, etc.)
+2. You want to use SQL functions (like `like`, `in`, etc.)
+3. You need to join with tables that aren't directly accessible via associations
+4. You want to dynamically build queries based on user input
+
+A pattern we use and recommend is keeping contexts clear of bloat from query-building code, which is delegated to specialized query modules - see [our article on query module pattern](https://curiosum.com/blog/composable-elixir-ecto-queries-modules).
+
+## Query Options
+
+When using plain keyword lists for filtering, in addition to `preload`, LemonCrud provides several options for manipulating the constructed Ecto query covering most common use cases: `limit` and `offset` for pagination purposes, and `order_by` for sorting.
+
+Another option is `count` that joins the base query with subqueries counting related records in a specific association.
+
+It should be noted that, when more advanced query manipulations are needed, pre-constructed Ecto queries should be used instead of keyword lists in the arguments of the functions.
+
+### limit
+
+The `limit` option restricts the number of results returned by the query. Under the hood, it applies `Ecto.Query.limit/2` to your query.
+
+```elixir
+# Get only the first item sorted by name in descending order
+iex> ItemContext.list_items(limit: 1, order_by: [desc: :name])
+
+# Apply limit combined with other options
+iex> ItemContext.list_items(
+  subcategory_id: subcategory.id,
+  preload: [subcategory: :category],
+  limit: 1,
+  offset: 1,
+  order_by: [desc: :name]
+)
+```
+
+### offset
+
+The `offset` option skips a specific number of results before returning the rest. This is commonly used with `limit` for pagination. Under the hood, it applies `Ecto.Query.offset/2` to your query.
+
+```elixir
+# Skip the first item and get the next two, sorted by name in descending order
+iex> ItemContext.list_items(limit: 2, offset: 1, order_by: [desc: :name])
+
+# Can be used with Ecto.Query as well
+iex> ItemContext.list_items(
+  from(i in Item, where: like(i.name, "Item 1.2.%")),
+  limit: 1,
+  offset: 1,
+  order_by: [desc: :name]
+)
+```
+
+### order_by
+
+The `order_by` option sorts the results based on specified fields and directions. Under the hood, it applies `Ecto.Query.order_by/3` to your query.
+
+```elixir
+# Sort items by name in descending order
+iex> ItemContext.list_items(order_by: [desc: :name])
+
+# Can be used with filtering conditions
+iex> CategoryContext.list_categories(
+  count: [:subcategories, :items],
+  order_by: [desc: :id]
+)
+```
+
+### count
+
+The `count` option adds virtual fields to your results with counts of associated records. Under the hood, it adds left-joined subqueries to count the associations and adds the counts as values virtual fields named `[association_name]_count`.
+
+These virtual fields need to be defined in the schema, preferably defaulting to nil.
+
+```elixir
+# Count associations for all categories
+iex> CategoryContext.list_categories(count: [:subcategories, :items])
+# Result example:
+# [
+#   %Category{id: 1, name: "Category 1", subcategories_count: 2, items_count: 4},
+#   %Category{id: 2, name: "Category 2", subcategories_count: 2, items_count: 4}
+# ]
+
+# Can be combined with other options
+iex> CategoryContext.list_categories(
+  id: category.id,
+  count: [:subcategories, :items],
+  order_by: [desc: :id]
+)
+
+# Works with get_by as well
+iex> CategoryContext.get_category_by(
+  name: "Category 1",
+  count: [:subcategories, :items],
+  preload: [:subcategories]
+)
+```
+
 ## Contributing
 
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
