@@ -1,5 +1,10 @@
 # LemonCrud
 
+[![Hex.pm](https://img.shields.io/hexpm/v/lemon_crud.svg)](https://hex.pm/packages/lemon_crud)
+[![CI](https://github.com/curiosum-dev/lemon_crud/actions/workflows/ci.yml/badge.svg)](https://github.com/curiosum-dev/lemon_crud/actions/workflows/ci.yml)
+[![Coverage Status](https://codecov.io/gh/curiosum-dev/lemon_crud/branch/main/graph/badge.svg)](https://codecov.io/gh/curiosum-dev/lemon_crud)
+[![License](https://img.shields.io/hexpm/l/lemon_crud.svg)](https://github.com/curiosum-dev/lemon_crud/blob/main/LICENSE)
+
 LemonCrud is a small library creating uniform yet flexible CRUD functions for your Phoenix contexts to reduce generated boilerplate.
 
 Paired with [Contexted](https://github.com/curiosum-dev/contexted), it adds a productivity benefit on top of Contexted's help in organizing Phoenix contexts in a nice and tidy way.
